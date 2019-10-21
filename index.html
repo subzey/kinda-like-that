@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	<style>
+		.wrap {
+			position: relative;
+			width: 3168px;
+			height: 2388px;
+			background: url(kupdvor.jpg) 0 0 no-repeat;
+			background-size: 3168px 2388px;
+		}
+		.demo {
+			position: absolute;
+			top: 280px;
+			left: 1560px;
+			width: 100px;
+			height: 100px;
+			mix-blend-mode: screen;
+		}
+	</style>
+</head>
+<body>
+	<div class="wrap">
+		<canvas width=200 height=200 class="demo"></canvas>
+	</div>
+	<script>
+		const c = document.querySelector('canvas').getContext('2d');
+		const uc = document.createElement('canvas').getContext('2d')
+		uc.canvas.width = 16;
+		uc.canvas.height = 16;
+
+		const images = [
+			'unicorn.000.gif',
+			'unicorn.001.gif',
+			'unicorn.002.gif',
+			'unicorn.003.gif',
+			'unicorn.004.gif',
+			'unicorn.005.gif',
+		].map(src => {
+			const im = new Image();
+			im.src = src;
+			return im;
+		})
+
+		document.body.appendChild(uc.canvas);
+
+		function uDraw(now) {
+			uc.canvas.width |= 0;
+
+			// uc.fillStyle = `hsl(${(now / 10) % 360}, 50%, 20%)`;
+			// uc.fillRect(0, 0, 16, 16);
+
+			const frame = Math.floor(now / 100 % 6);
+
+			uc.drawImage(images[frame], (now / 200) % 18 - 18, 0, 16, 16);
+			uc.drawImage(images[frame], (now / 200) % 18, 0, 16, 16);
+
+			return uc.getImageData(0, 0, 16, 16);
+		}
+
+		function draw(now) {
+			const imageData = uDraw(now);
+
+			c.canvas.width |= 0;
+
+			for (let x = 0; x < 16; x++) {
+				for (let y = 0; y < 16; y++) {
+					let realX = 70 + x * 5;
+					let realY = 60 + y * 5 + x * 2.5;
+
+					if (x > 7) {
+						realX += 4;
+						realY += 2;
+					}
+
+					const offset = (y * 16 + x) * 4;
+					const color = `rgb(${imageData.data[offset]}, ${imageData.data[offset+1]}, ${imageData.data[offset+2]})`;
+
+					c.beginPath();
+					c.arc(realX, realY, 1, 0, 2 * Math.PI);
+					c.fillStyle = color;
+					c.fill();
+				}
+			}
+
+			requestAnimationFrame(draw);
+		}
+
+		requestAnimationFrame(draw);
+
+	</script>
+</body>
+</html>
